@@ -18,14 +18,19 @@ public:
         m_doors = new Doors;
 
         m_brain = new Brain(*m_cabin, *m_doors, count);
-        connect(m_brain, &Brain::running, this, &Start::update);
 
         m_press = QVector<Press *>(count);
         m_floor = QVector<Floor *>(count);
 
-        m_label = new QLCDNumber(1);
+        m_label = new QLCDNumber();
 
+        // Обновляем этаж при движении кабины
+        connect(m_brain, &Brain::running, this, &Start::updateFloor);
+
+        // Компоновщик интерфейса
         auto layout = new QVBoxLayout();
+
+        // Добавляем индикатор
         layout->addWidget(m_label);
 
         for (int i = count; i > 0; i--)
@@ -33,15 +38,20 @@ public:
             m_press[i - 1] = new Press(*m_brain, i);
             m_floor[i - 1] = new Floor(*m_press[i - 1]);
 
+            // Добавляем виджет кнопки
             layout->addWidget(m_floor[i - 1]);
         }
 
+        // Отрисовываем
         setLayout(layout);
+
+        // Обновляем
+        updateFloor();
     }
 
 protected slots:
 
-    void update()
+    void updateFloor()
     {
         m_label->display(m_brain->floor());
     }
