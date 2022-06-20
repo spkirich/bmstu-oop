@@ -18,11 +18,15 @@ public:
         m_doors = new Doors;
 
         m_brain = new Brain(*m_cabin, *m_doors, count);
+        connect(m_brain, &Brain::running, this, &Start::update);
 
         m_press = QVector<Press *>(count);
         m_floor = QVector<Floor *>(count);
 
+        m_label = new QLCDNumber(1);
+
         auto layout = new QVBoxLayout();
+        layout->addWidget(m_label);
 
         for (int i = count; i > 0; i--)
         {
@@ -35,6 +39,13 @@ public:
         setLayout(layout);
     }
 
+protected slots:
+
+    void update()
+    {
+        m_label->display(m_brain->floor());
+    }
+
 private:
 
     Brain *m_brain;
@@ -44,13 +55,15 @@ private:
 
     QVector<Press *> m_press;
     QVector<Floor *> m_floor;
+
+    QLCDNumber *m_label;
 };
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    Start start(15);
+    Start start(9);
     start.show();
 
     return app.exec();
